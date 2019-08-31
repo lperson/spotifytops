@@ -1,0 +1,27 @@
+[package]
+name = "rust_spotifytops"
+version = "0.1.0"
+authors = ["Larry Person <lp10011@gmail.com>"]
+edition = "2018"
+
+[lib]
+name = "libspotifytops"
+path = "src/lib/mod.rs"
+
+[[bin]]
+name = "spotifytops"
+path = "src/bin/main.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hyper="^0.12.33"
+futures="^0.1.28"
+lazy_static="^1.4.0"
+dirs="^2.0.2"
+serde = { version = "^1.0.0", features = ["derive"] }
+toml="^0.5.0"
+percent-encoding="^2.1.0"
+serde_urlencoded="^0.6.1"
+hyper-tls="^0.3.2"
+tokio="^0.1"

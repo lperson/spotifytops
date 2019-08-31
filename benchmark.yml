@@ -1,0 +1,11 @@
+---
+
+threads: 1000
+base: 'http://localhost:8002'
+iterations: 10 
+rampup: 0
+
+plan:
+  - name: fetch /
+    request:
+      url: /
