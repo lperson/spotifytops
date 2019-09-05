@@ -11,3 +11,6 @@ pub use server::*;
 
 pub mod app;
 pub use app::*;
+
+pub mod spotify_future;
+pub use spotify_future::*;

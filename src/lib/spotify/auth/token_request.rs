@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 use super::super::super::CONFIG;
-use super::get_callback;
+use super::{get_callback, p_encode};
 
 #[derive(Serialize, Debug)]
 pub struct TokenRequest<'a> {

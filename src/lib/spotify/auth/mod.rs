@@ -5,11 +5,12 @@ pub mod spotify_scopes;
 use super::super::CONFIG;
 
 pub mod token_request;
+pub mod token_response;
 
 use std::vec::Vec;
 use std::io::Write;
 
-fn p_encode(s: &String) -> String {
+pub fn p_encode(s: &String) -> String {
     percent_encode(s.as_bytes(), CONTROLS).to_string()
 }
 
