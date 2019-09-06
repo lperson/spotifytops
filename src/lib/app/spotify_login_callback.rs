@@ -15,7 +15,8 @@ pub mod spotify_login_callback {
 
     use super::super::super::spotify_future::spotify_future::SpotifyFuture;
 
-    type BoxFut = Box<dyn Future<Item = Response<Body>, Error = hyper::Error> + Send>;
+    type BoxFut = Box<dyn Future<Item = Response<Body>, Error = SimpleError> + Send>;
+
     pub fn handle(req: &Request<Body>) -> BoxFut {
         println!("RECEIVED REQUEST ==> {:?}", req);
 
@@ -41,6 +42,7 @@ pub mod spotify_login_callback {
 
         let the_future = client
             .request(request)
+            .map_err(|x| SimpleError::new("fuck you already"))
             .and_then(move |result| {
                 println!("STATUS_CODE ==> {}", result.status());
                 result
@@ -67,6 +69,7 @@ pub mod spotify_login_callback {
                         println!("ACCESS TOKEN ==> {:?}", token_response.access_token);
                         Ok(token_response.access_token.unwrap())
                     })
+                    .map_err(|x| SimpleError::new("c'mon"))
                     .and_then(move |x| {
                         let auth_code = if let Ok(auth_string) = x {
                             auth_string
@@ -75,47 +78,9 @@ pub mod spotify_login_callback {
                             String::new()
                         };
 
-                        let request1 = Request::builder()
-                            .method("GET")
-                            .uri(format!(
-                                "https://api.spotify.com/v1/me/top/{}?limit=50&time_range={}",
-                                "tracks", "short_term"
-                            ))
-                            .header("Authorization", format!("Bearer {}", auth_code))
-                            .body(Body::empty())
-                            .unwrap();
-                        let future1 = client.request(request1).and_then(move |result| {
-                            result.into_body().concat2().map(move |body| body)
-                        });
-                        let future1 = SpotifyFuture::new(future1);
-
-                        let request2 = Request::builder()
-                            .method("GET")
-                            .uri(format!(
-                                "https://api.spotify.com/v1/me/top/{}?limit=50&time_range={}",
-                                "tracks", "short_term"
-                            ))
-                            .header("Authorization", format!("Bearer {}", auth_code))
-                            .body(Body::empty())
-                            .unwrap();
-                        let future2 = client.request(request2).and_then(move |result| {
-                            result.into_body().concat2().map(move |body| body)
-                        });
-                        let future2 = SpotifyFuture::new(future2);
-
-                        let request3 = Request::builder()
-                            .method("GET")
-                            .uri(format!(
-                                "https://api.spotify.com/v1/me/top/{}?limit=50&time_range={}",
-                                "tracks", "short_term"
-                            ))
-                            .header("Authorization", format!("Bearer {}", auth_code))
-                            .body(Body::empty())
-                            .unwrap();
-                        let future3 = client.request(request3).and_then(move |result| {
-                            result.into_body().concat2().map(move |body| body)
-                        });
-                        let future3 = SpotifyFuture::new(future3);
+                        let future1 = SpotifyFuture::new(&auth_code, "tracks", "short_term");
+                        let future2 = SpotifyFuture::new(&auth_code, "tracks", "medium_term");
+                        let future3 = SpotifyFuture::new(&auth_code, "tracks", "long_term");
 
                         future1.join(future2).join(future3)
                     })

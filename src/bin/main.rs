@@ -23,7 +23,9 @@ use libspotifytops::app::*;
 use libspotifytops::server::*;
 use libspotifytops::spotify::auth::*;
 
-type BoxFut = Box<dyn Future<Item = Response<Body>, Error = hyper::Error> + Send>;
+use simple_error::SimpleError;
+
+type BoxFut = Box<dyn Future<Item = Response<Body>, Error = SimpleError> + Send>;
 
 
 fn make_handler(
