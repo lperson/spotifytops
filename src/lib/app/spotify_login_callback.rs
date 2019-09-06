@@ -18,7 +18,7 @@ pub mod spotify_login_callback {
     type BoxFut = Box<dyn Future<Item = Response<Body>, Error = SimpleError> + Send>;
 
     pub fn handle(req: &Request<Body>) -> BoxFut {
-        println!("RECEIVED REQUEST ==> {:?}", req);
+        //println!("RECEIVED REQUEST ==> {:?}", req);
 
         let https = HttpsConnector::new(4).unwrap();
         let client = Client::builder().build::<_, hyper::Body>(https);
@@ -26,7 +26,7 @@ pub mod spotify_login_callback {
         let parameters = server::get_query(&req).unwrap();
         let code = &parameters.get("code").unwrap().clone().unwrap();
 
-        println!("CODE ==> {:?}", code);
+        // println!("CODE ==> {:?}", code);
 
         let token_request_payload = token_request::TokenRequest::get_serialized_request(&code);
 
@@ -49,7 +49,7 @@ pub mod spotify_login_callback {
                     .into_body()
                     .concat2()
                     .map(move |body| {
-                        println!("RESPONSE ==> {:?}", body);
+                        // println!("RESPONSE ==> {:?}", body);
                         let token_response: token_response::TokenResponse =
                             serde_json::from_str(std::str::from_utf8(&body).unwrap())
                                 .unwrap_or_else(|e| {
@@ -64,9 +64,9 @@ pub mod spotify_login_callback {
                             return Err(Box::new(SimpleError::new("parse error")));
                         }
 
-                        println!("TOKEN RESPONSE {:?}", token_response);
+                        //println!("TOKEN RESPONSE {:?}", token_response);
 
-                        println!("ACCESS TOKEN ==> {:?}", token_response.access_token);
+                        // println!("ACCESS TOKEN ==> {:?}", token_response.access_token);
                         Ok(token_response.access_token.unwrap())
                     })
                     .map_err(|x| SimpleError::new("c'mon"))
