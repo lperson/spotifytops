@@ -16,13 +16,10 @@ impl TokenRequest<'_> {
             grant_type: "authorization_code".to_string(),
             client_id: &CONFIG.client_id,
             client_secret: &CONFIG.client_secret,
-        }).unwrap();
+        })
+        .unwrap();
 
-        token_request.push_str(&format!(
-            "&code={}&redirect_uri={}",
-            code,
-            get_callback()
-        ));
+        token_request.push_str(&format!("&code={}&redirect_uri={}", code, get_callback()));
 
         println!("{:?}", token_request);
 

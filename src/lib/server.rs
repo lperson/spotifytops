@@ -1,7 +1,7 @@
 pub mod server {
     use std::collections::hash_map::HashMap;
-    use std::vec::Vec;
     use std::rc::Rc;
+    use std::vec::Vec;
 
     use hyper::header::LOCATION;
     use hyper::http::HeaderValue;
@@ -29,7 +29,11 @@ pub mod server {
                 Some(query_parts.iter().fold(query, |mut query, query_part| {
                     let parts: Vec<&str> = query_part.split("=").collect();
                     let value = if parts.len() > 1 {
-                        Some(Rc::from(String::from(percent_encoding::percent_decode_str(parts[1]).decode_utf8().unwrap())))
+                        Some(Rc::from(String::from(
+                            percent_encoding::percent_decode_str(parts[1])
+                                .decode_utf8()
+                                .unwrap(),
+                        )))
                     } else {
                         None
                     };

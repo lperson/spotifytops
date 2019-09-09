@@ -1,10 +1,26 @@
-pub struct TopItemRetriever<T> {
-    uri: String,
-    authorization: String,
+use std::marker::PhantomData;
+
+use serde::{Deserialize};
+use serde::de::DeserializeOwned;
+use serde_json;
+
+use super::super::spotify::TopArtistResponse;
+
+pub struct Retriever<T> {
+    pub uri: String,
+    pub authorization: String,
+    phantom: PhantomData<T>,
 }
 
-impl<T> TopItemRetriever<T> {
-    fn new(auth_code: &String, what_to_get: &str, timeframe: &str) -> Self {
+pub trait RetrieveThing {}
+
+pub trait Retrievable<'a> {
+    type Item: DeserializeOwned;
+    fn deserialize(s: &'a str) -> Result<Self::Item, serde_json::Error>;
+}
+
+impl<T> Retriever<T> {
+    pub fn new(auth_code: &String, what_to_get: &str, timeframe: &str) -> Self {
         let uri = format!(
             "https://api.spotify.com/v1/me/top/{}?limit=50&time_range={}",
             what_to_get, timeframe
@@ -12,6 +28,24 @@ impl<T> TopItemRetriever<T> {
 
         let authorization = format!("Bearer {}", auth_code);
 
-        TopItemRetriever { uri, authorization }
+        Self {
+            uri,
+            authorization,
+            phantom: PhantomData,
+        }
+    }
+}
+
+impl<'a, T> Retrievable<'a> for Retriever<T>
+where
+    T: DeserializeOwned
+{
+    type Item = T;
+
+    fn deserialize(s: &'a str) -> Result<Self::Item, serde_json::Error>
+    where
+        T: DeserializeOwned
+    {
+        serde_json::from_str(s)
     }
 }

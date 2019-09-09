@@ -1,10 +1,11 @@
-#[macro_use] extern crate lazy_static;
+#[macro_use]
+extern crate lazy_static;
 
 pub mod spotify;
 pub use spotify::*;
 
 pub mod config;
-pub use config::config::*;
+pub use config::*;
 
 pub mod server;
 pub use server::*;
