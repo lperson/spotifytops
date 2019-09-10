@@ -8,11 +8,10 @@ use hyper::{Body, Request};
 use hyper_tls::HttpsConnector;
 use simple_error::SimpleError;
 
-use super::spotify::top_items_retriever::{Retriever, Retrievable};
-use serde::Deserialize;
-use serde::de::DeserializeOwned;
+use super::app::STATE;
 
-use super::spotify::TopArtistResponse;
+use super::spotify::top_items_retriever::{Retriever, Retrievable};
+use serde::de::DeserializeOwned;
 
 type BoxFut<T> = Box<dyn Future<Item = T, Error = SimpleError> + Send>;
 
@@ -29,8 +28,6 @@ impl<'a, T> SpotifyFuture<'a, T>
     fn make_future(retriever: &Retriever<T>) -> BoxFut<T>
         where T: DeserializeOwned
     {
-        let https = HttpsConnector::new(4).unwrap();
-        let client = Client::builder().build::<_, hyper::Body>(https);
         let request = Request::builder()
             .method("GET")
             .uri(retriever.uri.clone())
@@ -38,7 +35,7 @@ impl<'a, T> SpotifyFuture<'a, T>
             .body(Body::empty())
             .unwrap();
 
-        let future = client
+        let future = STATE.http_client
             .request(request)
             .map_err(|x| SimpleError::new("x"))
             .and_then(move |result| {

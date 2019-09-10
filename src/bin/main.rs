@@ -1,26 +1,16 @@
 use futures::future;
-use futures::future::lazy;
-use futures::sync::oneshot;
-use hyper::header::LOCATION;
-use hyper::http::HeaderValue;
-use hyper::rt::{spawn, Future, Stream};
+use hyper::rt::Future;
 use hyper::service::service_fn;
 use hyper::{Body, Method, Request, Response, Server, StatusCode};
-use serde_json;
 use tokio::timer::Delay;
 
-use hyper::Client;
-use hyper_tls::HttpsConnector;
-
 use std::cell::RefCell;
-use std::error::Error;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use libspotifytops::app::spotify_login_callback;
-use libspotifytops::app::*;
-use libspotifytops::server::*;
 use libspotifytops::spotify::auth::*;
+use libspotifytops::server::server;
 
 use simple_error::SimpleError;
 

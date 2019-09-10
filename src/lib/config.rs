@@ -1,10 +1,9 @@
-
 static KEY: &str = "SPOTIFY_TOPS_CONFIG_FILE_DIR";
 static FILE_NAME: &str = "spotifytopsconfig.toml";
 
 use std::env;
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::{Read};
 use std::path::PathBuf;
 
 // extern crate dirs;
@@ -14,7 +13,7 @@ use dirs::home_dir;
 use serde::Deserialize;
 
 lazy_static! {
-    pub static ref CONFIG: Config = Config::new();
+    pub static ref CONFIG: Config = Default::default();
 }
 
 #[derive(Deserialize, Debug)]
@@ -22,10 +21,17 @@ pub struct Config {
     pub client_id: String,
     pub client_secret: String,
     pub redirect_host_and_port: String,
+    pub template_dir: String,
 }
 
 impl Config {
-    pub fn new() -> Self {
+    pub fn default_config_file_dir() -> String {
+        String::from(home_dir().unwrap_or_default().to_str().unwrap())
+    }
+}
+
+impl Default for Config {
+    fn default() -> Self {
         let config_file_dir = match env::var(KEY) {
             Ok(val) => val,
             Err(e) => Config::default_config_file_dir(),
@@ -43,15 +49,10 @@ impl Config {
 
         toml::from_str(config_string.as_str()).expect("Error parsing config file")
     }
-
-    pub fn default_config_file_dir() -> String {
-        String::from(home_dir().unwrap_or_default().to_str().unwrap())
-    }
 }
+
 
 #[cfg(test)]
 mod tests {
-    use config;
-
     fn reads_config_from_default_path() {}
 }

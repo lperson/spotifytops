@@ -2,7 +2,10 @@ pub mod auth;
 pub use auth::*;
 
 pub mod top_artist_response;
-pub use top_artist_response::TopArtistResponse;
+pub use top_artist_response::*;
+
+pub mod top_track_response;
+pub use top_track_response::*;
 
 pub mod error_object;
 pub use error_object::ErrorObject;

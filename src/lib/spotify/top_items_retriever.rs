@@ -4,15 +4,11 @@ use serde::{Deserialize};
 use serde::de::DeserializeOwned;
 use serde_json;
 
-use super::super::spotify::TopArtistResponse;
-
 pub struct Retriever<T> {
     pub uri: String,
     pub authorization: String,
     phantom: PhantomData<T>,
 }
-
-pub trait RetrieveThing {}
 
 pub trait Retrievable<'a> {
     type Item: DeserializeOwned;
