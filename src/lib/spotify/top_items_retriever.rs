@@ -1,6 +1,5 @@
 use std::marker::PhantomData;
 
-use serde::{Deserialize};
 use serde::de::DeserializeOwned;
 use serde_json;
 
@@ -16,7 +15,7 @@ pub trait Retrievable<'a> {
 }
 
 impl<T> Retriever<T> {
-    pub fn new(auth_code: &String, what_to_get: &str, timeframe: &str) -> Self {
+    pub fn new(auth_code: &str, what_to_get: &str, timeframe: &str) -> Self {
         let uri = format!(
             "https://api.spotify.com/v1/me/top/{}?limit=50&time_range={}",
             what_to_get, timeframe

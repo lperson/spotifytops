@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 use super::super::super::CONFIG;
-use super::{get_callback, p_encode};
+use super::{get_callback};
 
 #[derive(Serialize, Debug)]
 pub struct TokenRequest<'a> {
@@ -11,7 +11,7 @@ pub struct TokenRequest<'a> {
 }
 
 impl TokenRequest<'_> {
-    pub fn get_serialized_request<'a>(code: &String) -> String {
+    pub fn get_serialized_request(code: &str) -> String {
         let mut token_request = serde_urlencoded::to_string(TokenRequest {
             grant_type: "authorization_code".to_string(),
             client_id: &CONFIG.client_id,
@@ -23,6 +23,6 @@ impl TokenRequest<'_> {
 
         println!("{:?}", token_request);
 
-        return token_request;
+        token_request
     }
 }

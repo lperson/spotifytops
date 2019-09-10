@@ -34,7 +34,7 @@ impl Default for Config {
     fn default() -> Self {
         let config_file_dir = match env::var(KEY) {
             Ok(val) => val,
-            Err(e) => Config::default_config_file_dir(),
+            Err(_) => Config::default_config_file_dir(),
         };
 
         let mut config_file_path = PathBuf::new();
@@ -54,5 +54,5 @@ impl Default for Config {
 
 #[cfg(test)]
 mod tests {
-    fn reads_config_from_default_path() {}
+    //fn reads_config_from_default_path() {}
 }

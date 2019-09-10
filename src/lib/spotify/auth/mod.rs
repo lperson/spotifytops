@@ -10,7 +10,7 @@ pub mod token_response;
 use std::io::Write;
 use std::vec::Vec;
 
-pub fn p_encode(s: &String) -> String {
+pub fn p_encode(s: &str) -> String {
     percent_encode(s.as_bytes(), CONTROLS).to_string()
 }
 
@@ -25,7 +25,7 @@ pub fn get_callback() -> String {
     String::from_utf8(callback).unwrap()
 }
 
-pub fn get_redirect(state: &String) -> String {
+pub fn get_redirect(state: &str) -> String {
     let mut redirect: Vec<u8> = Vec::new();
     write!(
         redirect,
@@ -33,7 +33,7 @@ pub fn get_redirect(state: &String) -> String {
          &response_type=code&redirect_uri={}&scope={}&state={}&show_dialog=False",
         p_encode(&CONFIG.client_id),
         p_encode(&get_callback()),
-        p_encode(&spotify_scopes::spotify_scopes::get_scopes()),
+        p_encode(&spotify_scopes::get_scopes()),
         p_encode(&state)
     )
     .unwrap();

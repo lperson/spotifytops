@@ -3,9 +3,8 @@ use futures::{
     prelude::*,
     Future, Poll,
 };
-use hyper::{Client, Chunk};
+use hyper::{Chunk};
 use hyper::{Body, Request};
-use hyper_tls::HttpsConnector;
 use simple_error::SimpleError;
 
 use super::app::STATE;
@@ -37,7 +36,7 @@ impl<'a, T> SpotifyFuture<'a, T>
 
         let future = STATE.http_client
             .request(request)
-            .map_err(|x| SimpleError::new("x"))
+            .map_err(|_| SimpleError::new("x"))
             .and_then(move |result| {
                 println!("{}", result.status());
                 if [404u16, 400u16]
@@ -66,7 +65,7 @@ impl<'a, T> SpotifyFuture<'a, T>
                         ).unwrap()
                     } 
                     )
-                    .map_err(|x| SimpleError::new("x"))
+                    .map_err(|_| SimpleError::new("x"))
             });
         Box::new(future)
     }
