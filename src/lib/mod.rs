@@ -15,3 +15,6 @@ pub use app::*;
 
 pub mod spotify_future;
 pub use spotify_future::*;
+
+pub mod mru_hashmap;
+pub use mru_hashmap::*;

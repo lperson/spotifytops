@@ -14,6 +14,8 @@ use std::collections::btree_map::BTreeMap;
 
 use serde_json;
 
+use uuid::Uuid;
+
 use super::super::server;
 use super::super::spotify::auth::{token_request, token_response};
 
@@ -25,6 +27,10 @@ use super::super::spotify::TopTrackResponse;
 use super::super::app::STATE;
 
 type BoxFut = Box<dyn Future<Item = Response<Body>, Error = SimpleError> + Send>;
+
+fn make_new_uuid() -> String {
+    Uuid::new_v4().to_hyphenated().encode_lower(&mut Uuid::encode_buffer()).to_string()
+}
 
 pub fn handle(req: &Request<Body>) -> BoxFut {
     //println!("RECEIVED REQUEST ==> {:?}", req);
@@ -75,6 +81,10 @@ pub fn handle(req: &Request<Body>) -> BoxFut {
                     //println!("TOKEN RESPONSE {:?}", token_response);
 
                     // println!("ACCESS TOKEN ==> {:?}", token_response.access_token);
+                    
+
+
+
                     Ok(token_response.access_token.unwrap())
                 })
                 .map_err(|_| SimpleError::new("c'mon"))
