@@ -36,7 +36,7 @@ impl<'a, T> SpotifyFuture<'a, T>
 
         let future = STATE.http_client
             .request(request)
-            .map_err(|_| SimpleError::new("x"))
+            .map_err(|_| SimpleError::new("error getting data"))
             .and_then(move |result| {
                 println!("{}", result.status());
                 if [404u16, 400u16]
@@ -45,8 +45,6 @@ impl<'a, T> SpotifyFuture<'a, T>
                 {
                     let this_return = future::err(SimpleError::new("400"));
                     return this_return;
-                    //.map(|x| x)
-                    //.map_err(|x| x);
                 }
 
                 future::ok(result)
@@ -65,7 +63,7 @@ impl<'a, T> SpotifyFuture<'a, T>
                         ).unwrap()
                     } 
                     )
-                    .map_err(|_| SimpleError::new("x"))
+                    .map_err(|_| SimpleError::new("error retrieving data"))
             });
         Box::new(future)
     }

@@ -21,7 +21,7 @@ fn make_handler() -> Box<dyn FnMut(Request<Body>) -> BoxFut + Send> {
                 if let Some(query) = server::get_query(&req) {
                     if let Some(token) = query.get("t") {
                         if let Some(token) = token {
-                            return spotify_tops::handle(&req);
+                            return spotify_tops::handle(token.clone()); 
                         }
                     }
                 } 

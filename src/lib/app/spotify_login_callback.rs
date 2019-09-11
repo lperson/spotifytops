@@ -40,7 +40,7 @@ pub fn handle(req: &Request<Body>) -> BoxFut {
 
     let the_future = STATE.http_client
         .request(request)
-        .map_err(|_| SimpleError::new("fuck you already"))
+        .map_err(|_| SimpleError::new("error with token request"))
         .and_then(|result| {
             result
                 .into_body()
@@ -74,7 +74,7 @@ pub fn handle(req: &Request<Body>) -> BoxFut {
                     Ok(response)
                 })
                 .map(|result| result.unwrap() )
-                .map_err(|_| SimpleError::new("c'mon"))
+                .map_err(|_| SimpleError::new("error retrieving token response body"))
         })
         .map_err(|x| {
             println!("SHORT CIRCUITED! ==> {:?}", x);

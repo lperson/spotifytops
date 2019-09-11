@@ -7,6 +7,7 @@ use futures::{future::join_all, prelude::*, Future};
 use simple_error::SimpleError;
 
 use std::collections::btree_map::BTreeMap;
+use std::rc::Rc;
 
 use serde_json;
 
@@ -21,14 +22,11 @@ use super::super::spotify::TopTrackResponse;
 
 type BoxFut = Box<dyn Future<Item = Response<Body>, Error = SimpleError> + Send>;
 
-pub fn handle(req: &Request<Body>) -> BoxFut {
-    let parameters = server::get_query(&req).unwrap();
-    let token = &parameters.get("t").unwrap().clone().unwrap();
-
+pub fn handle(token: Rc<String>) -> BoxFut {
     let mut auth_code: Option<String> = None;
     {
         let mut tokens = STATE.tokens.lock().unwrap();
-        if let Some(stored_auth_code) = tokens.get(token) {
+        if let Some(stored_auth_code) = tokens.get(&token) { 
             auth_code = Some(stored_auth_code.clone());
         }
     }
