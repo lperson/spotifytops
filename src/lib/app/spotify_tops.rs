@@ -1,8 +1,8 @@
-use hyper::{Body, Request, Response};
+use hyper::{Body, Response};
 
 extern crate tokio;
 
-use futures::{future::join_all, prelude::*, Future};
+use futures::{future::join_all, Future};
 
 use simple_error::SimpleError;
 
@@ -10,8 +10,6 @@ use std::collections::btree_map::BTreeMap;
 use std::rc::Rc;
 
 use serde_json;
-
-use super::super::server;
 
 use super::super::spotify_future::SpotifyFuture;
 
