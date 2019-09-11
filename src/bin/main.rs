@@ -2,11 +2,9 @@ use futures::future;
 use hyper::rt::Future;
 use hyper::service::service_fn;
 use hyper::{Body, Method, Request, Response, Server, StatusCode};
-use tokio::timer::Delay;
-
-use std::time::{Duration, Instant};
 
 use libspotifytops::app::spotify_login_callback;
+use libspotifytops::app::spotify_tops;
 use libspotifytops::spotify::auth::*;
 use libspotifytops::server;
 
@@ -20,30 +18,15 @@ fn make_handler() -> Box<dyn FnMut(Request<Body>) -> BoxFut + Send> {
 
         match (req.method(), req.uri().path()) {
             (&Method::GET, "/") => {
+                if let Some(query) = server::get_query(&req) {
+                    if let Some(token) = query.get("t") {
+                        if let Some(token) = token {
+                            return spotify_tops::handle(&req);
+                        }
+                    }
+                } 
+                
                 server::redirect(&mut response, &get_redirect(&req.uri().to_string()));
-            }
-
-            (&Method::GET, "/test/") => {
-                println!("RECEIVED /test ==> {:?}", req);
-
-                let when = Instant::now() + Duration::from_secs(3);
-
-                let first = || {
-                    println!("first");
-                    future::ok(Response::<Body>::new(Body::empty()))
-                };
-
-                let the_future = Delay::new(when)
-                    .and_then(move |_| {
-                        println!("delay reached");
-                        future::ok(Response::<Body>::new(Body::empty()))
-                    })
-                    .join(first())
-                    .and_then(move |_| first())
-                    .and_then(|_| future::ok(Response::<Body>::new(Body::empty())))
-                    .map_err(|e| panic!("delay errored; err={:?}", e));
-
-                return Box::new(the_future);
             }
 
             (&Method::GET, "/SpotifyLoginCallback/") => {
