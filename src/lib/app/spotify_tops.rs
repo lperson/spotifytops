@@ -103,11 +103,10 @@ pub fn handle(token: Rc<String>) -> BoxFut {
             let rendered = STATE.handlebars.render("tops", &data).unwrap();
 
             let mut response = Response::<Body>::new(Body::from(rendered));
-            response.headers_mut()
-                .insert(
-                    CONTENT_TYPE,
-                    HeaderValue::from_static("text/html; charset=utf-8")
-                );
+            response.headers_mut().insert(
+                CONTENT_TYPE,
+                HeaderValue::from_static("text/html; charset=utf-8"),
+            );
             response
         })
         .map_err(|x| x);
