@@ -8,6 +8,4 @@ COPY src ./src/
 COPY templates /root/templates/
 RUN cargo build --release
 
-ENV SPOTIFY_TOPS_LISTEN_ADDR 0.0.0.0:$PORT
-
 CMD ["cargo", "run", "--release"]
