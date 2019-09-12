@@ -10,7 +10,6 @@ use futures::{future::join_all, Future};
 use simple_error::SimpleError;
 
 use std::collections::btree_map::BTreeMap;
-use std::rc::Rc;
 
 use serde::Serialize;
 use serde_json;
@@ -33,21 +32,7 @@ where
 
 type BoxFut = Box<dyn Future<Item = Response<Body>, Error = SimpleError> + Send>;
 
-pub fn handle(token: Rc<String>) -> BoxFut {
-    let mut auth_code: Option<String> = None;
-    {
-        let mut tokens = STATE.tokens.lock().unwrap();
-        if let Some(stored_auth_code) = tokens.get(&token) {
-            auth_code = Some(stored_auth_code.clone());
-        }
-    }
-
-    if auth_code == None {
-        // TODO(lmp) -- redirect to / or send a not authorized
-    }
-
-    let auth_code = auth_code.unwrap();
-
+pub fn handle(auth_code: &str) -> BoxFut {
     let the_artists_futures = vec![
         SpotifyFuture::<TopArtistResponse>::new(Retriever::new(
             &auth_code,
