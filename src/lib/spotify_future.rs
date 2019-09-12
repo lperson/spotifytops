@@ -3,8 +3,7 @@ use futures::{
     prelude::*,
     Future, Poll,
 };
-use hyper::{Chunk};
-use hyper::{Body, Request};
+use hyper::{Body, Request, Chunk, header::{AUTHORIZATION, ACCEPT, CONTENT_TYPE}};
 use simple_error::SimpleError;
 
 use super::app::STATE;
@@ -30,7 +29,9 @@ impl<'a, T> SpotifyFuture<'a, T>
         let request = Request::builder()
             .method("GET")
             .uri(retriever.uri.clone())
-            .header("Authorization", retriever.authorization.clone())
+            .header(AUTHORIZATION, retriever.authorization.clone())
+            .header(ACCEPT, "application/json")
+            .header(CONTENT_TYPE, "application/json")
             .body(Body::empty())
             .unwrap();
 
@@ -38,7 +39,6 @@ impl<'a, T> SpotifyFuture<'a, T>
             .request(request)
             .map_err(|_| SimpleError::new("error getting data"))
             .and_then(move |result| {
-                println!("{}", result.status());
                 if [404u16, 400u16]
                     .iter()
                     .any(|x| result.status().as_u16() == *x)

@@ -10,11 +10,9 @@ use percent_encoding;
 
 pub fn redirect<'a>(response: &'a mut Response<Body>, location: &str) -> &'a Response<Body> {
     *response.status_mut() = StatusCode::FOUND;
-    println!("{:?}", location);
     response
         .headers_mut()
         .append(LOCATION, HeaderValue::from_str(&location).unwrap());
-    println!("{:?}", response);
     response
 }
 
