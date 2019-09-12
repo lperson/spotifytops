@@ -15,6 +15,7 @@ type BoxFut = Box<dyn Future<Item = Response<Body>, Error = SimpleError> + Send>
 
 fn make_handler() -> Box<dyn FnMut(Request<Body>) -> BoxFut + Send> {
     Box::new(move |req: Request<Body>| -> BoxFut {
+        println!("{:?}", req);
         let mut response = Response::new(Body::empty());
 
         match (req.method(), req.uri().path()) {

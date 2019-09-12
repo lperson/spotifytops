@@ -39,7 +39,6 @@ impl<'a, T> SpotifyFuture<'a, T>
             .request(request)
             .map_err(|_| SimpleError::new("error getting data"))
             .and_then(move |result| {
-                println!("{}", result.status());
                 if [404u16, 400u16]
                     .iter()
                     .any(|x| result.status().as_u16() == *x)
@@ -51,7 +50,6 @@ impl<'a, T> SpotifyFuture<'a, T>
                 future::ok(result)
             })
             .and_then(|result| {
-                println!("{:?}", result.headers());
                 result
                     .into_body()
                     .concat2()

@@ -21,8 +21,6 @@ impl TokenRequest<'_> {
 
         token_request.push_str(&format!("&code={}&redirect_uri={}", code, get_callback()));
 
-        println!("{:?}", token_request);
-
         token_request
     }
 }
