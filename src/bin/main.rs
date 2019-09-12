@@ -7,6 +7,7 @@ use libspotifytops::app::spotify_login_callback;
 use libspotifytops::app::spotify_tops;
 use libspotifytops::spotify::auth::*;
 use libspotifytops::server;
+use libspotifytops::CONFIG;
 
 use simple_error::SimpleError;
 
@@ -44,7 +45,7 @@ fn make_handler() -> Box<dyn FnMut(Request<Body>) -> BoxFut + Send> {
 }
 
 fn main() {
-    let addr = ([127, 0, 0, 1], 8080).into();
+    let addr = format!("{}:{}", CONFIG.listen_addr, CONFIG.listen_port).parse().unwrap();
 
     let server = Server::bind(&addr)
         .serve(move || {
