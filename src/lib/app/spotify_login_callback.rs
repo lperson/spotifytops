@@ -1,11 +1,11 @@
-use hyper::{Body, Request, Response};
+use hyper::{
+    header::{CONTENT_LENGTH, CONTENT_TYPE},
+    Body, Request, Response,
+};
 
 extern crate tokio;
 
-use futures::{
-    Future,
-    prelude::*
-};
+use futures::{prelude::*, Future};
 
 use simple_error::SimpleError;
 
@@ -13,15 +13,18 @@ use serde_json;
 
 use uuid::Uuid;
 
+use super::super::app::STATE;
 use super::super::server;
 use super::super::spotify::auth::{token_request, token_response};
-use super::super::app::STATE;
 use super::super::CONFIG;
 
 type BoxFut = Box<dyn Future<Item = Response<Body>, Error = SimpleError> + Send>;
 
 fn make_new_uuid() -> String {
-    Uuid::new_v4().to_hyphenated().encode_lower(&mut Uuid::encode_buffer()).to_string()
+    Uuid::new_v4()
+        .to_hyphenated()
+        .encode_lower(&mut Uuid::encode_buffer())
+        .to_string()
 }
 
 pub fn handle(req: &Request<Body>) -> BoxFut {
@@ -33,12 +36,13 @@ pub fn handle(req: &Request<Body>) -> BoxFut {
     let request = Request::builder()
         .method("POST")
         .uri("https://accounts.spotify.com/api/token")
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .header("Content-Length", token_request_payload.len())
+        .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
+        .header(CONTENT_LENGTH, token_request_payload.len())
         .body(Body::from(token_request_payload))
         .unwrap();
 
-    let the_future = STATE.http_client
+    let the_future = STATE
+        .http_client
         .request(request)
         .map_err(|_| SimpleError::new("error with token request"))
         .and_then(|result| {
@@ -70,10 +74,13 @@ pub fn handle(req: &Request<Body>) -> BoxFut {
                     }
 
                     let mut response = Response::new(Body::empty());
-                    server::redirect(&mut response, format!("{}/?t={}", CONFIG.redirect_host_and_port, uuid).as_str());
+                    server::redirect(
+                        &mut response,
+                        format!("{}/?t={}", CONFIG.redirect_host_and_port, uuid).as_str(),
+                    );
                     Ok(response)
                 })
-                .map(|result| result.unwrap() )
+                .map(|result| result.unwrap())
                 .map_err(|_| SimpleError::new("error retrieving token response body"))
         })
         .map_err(|x| {
