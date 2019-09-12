@@ -91,7 +91,6 @@ pub fn handle(token: Rc<String>) -> BoxFut {
                 ).collect();
 
                 let mut data = BTreeMap::new();
-                data.insert("test", serde_json::to_value("Hello Larry").unwrap());
                 data.insert("artists", serde_json::to_value(artists_results).unwrap());
                 data.insert("tracks", serde_json::to_value(tracks_results).unwrap());
 

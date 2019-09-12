@@ -1,10 +1,11 @@
-{{test}}
+<html>
+
 {{#each artists}}
-
-{{header}}
-
-{{#each data.items}}
-  {{name}}
+{{> top_artists . }}
 {{/each}}
 
+{{#each tracks}}
+{{> top_tracks . }}
 {{/each}}
+
+</html>

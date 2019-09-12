@@ -34,7 +34,7 @@ impl Default for State {
         handlebars
             .register_template_file(
                 "top_tracks",
-                format!("{}/top_artists.hbs", CONFIG.template_dir),
+                format!("{}/top_tracks.hbs", CONFIG.template_dir),
             )
             .unwrap();
         handlebars

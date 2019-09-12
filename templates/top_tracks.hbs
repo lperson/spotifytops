@@ -1,0 +1,10 @@
+<div>
+  <div><b>Top tracks &mdash; {{header}}</b></div>
+  <ol>
+    {{#each data.items}}
+    <li>
+      {{#each artists}}<span>{{name}}{{#unless @last}}, {{/unless}}</span>{{/each}} &mdash; {{name}}
+    </li>
+    {{/each}}
+  </ol>
+</div>
