@@ -16,16 +16,18 @@ pub struct TokenResponse {
     pub scope: Option<String>,
 }
 
-
 impl TokenResponse {
     pub fn new_error(error: String, error_description: String) -> TokenResponse {
         TokenResponse {
-            error: Some(AuthenticationError { error, error_description }),
+            error: Some(AuthenticationError {
+                error,
+                error_description,
+            }),
             access_token: None,
             refresh_token: None,
             token_type: None,
             expires_in: None,
-            scope: None
+            scope: None,
         }
     }
 }

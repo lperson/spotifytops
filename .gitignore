@@ -1,5 +1,6 @@
 /target
 **/*.rs.bk
-.vscode/**/*
+.vscode
+.idea
 benchmark.md
 benchmark.out
