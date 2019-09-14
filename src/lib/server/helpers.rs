@@ -1,8 +1,9 @@
 use std::collections::hash_map::HashMap;
+use std::path::Path;
 use std::rc::Rc;
 use std::vec::Vec;
 
-use hyper::header::LOCATION;
+use hyper::header;
 use hyper::http::HeaderValue;
 use hyper::{Body, Request, Response, StatusCode};
 
@@ -12,7 +13,7 @@ pub fn redirect<'a>(response: &'a mut Response<Body>, location: &str) -> &'a Res
     *response.status_mut() = StatusCode::FOUND;
     response
         .headers_mut()
-        .append(LOCATION, HeaderValue::from_str(&location).unwrap());
+        .append(header::LOCATION, HeaderValue::from_str(&location).unwrap());
     response
 }
 
@@ -38,4 +39,21 @@ pub fn get_query(request: &Request<Body>) -> Option<HashMap<&str, Option<Rc<Stri
                 query
             }))
         })
+}
+
+// https://github.com/brson/basic-http-server/blob/9577fd13c09838c884589189f909a5cea7bde462/src/main.rs#L248
+pub fn file_path_mime(file_path: &Path) -> mime::Mime {
+    match file_path.extension().and_then(std::ffi::OsStr::to_str) {
+        Some("html") => mime::TEXT_HTML,
+        Some("css") => mime::TEXT_CSS,
+        Some("js") => mime::TEXT_JAVASCRIPT,
+        Some("jpg") => mime::IMAGE_JPEG,
+        Some("md") => "text/markdown; charset=UTF-8"
+            .parse::<mime::Mime>()
+            .unwrap(),
+        Some("png") => mime::IMAGE_PNG,
+        Some("svg") => mime::IMAGE_SVG,
+        Some("wasm") => "application/wasm".parse::<mime::Mime>().unwrap(),
+        _ => mime::TEXT_PLAIN,
+    }
 }

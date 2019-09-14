@@ -1,27 +1,23 @@
-use futures::future;
-use hyper::rt::Future;
+use futures::{future, Future};
 use hyper::service::service_fn;
 use hyper::{Body, Method, Request, Response, Server, StatusCode};
 
 use libspotifytops::app::spotify_login_callback;
 use libspotifytops::app::spotify_tops;
 use libspotifytops::app::STATE;
-use libspotifytops::server;
+use libspotifytops::server::{helpers as server_helpers, FileServer, ResponseFuture};
 use libspotifytops::spotify::auth::*;
 use libspotifytops::CONFIG;
 
-use simple_error::SimpleError;
 
-type BoxFut = Box<dyn Future<Item = Response<Body>, Error = SimpleError> + Send>;
-
-fn make_handler() -> Box<dyn FnMut(Request<Body>) -> BoxFut + Send> {
-    Box::new(move |req: Request<Body>| -> BoxFut {
+fn make_handler() -> Box<dyn FnMut(Request<Body>) -> ResponseFuture + Send> {
+    Box::new(move |req: Request<Body>| -> ResponseFuture {
         println!("{:?}", req);
         let mut response = Response::new(Body::empty());
 
         match (req.method(), req.uri().path()) {
             (&Method::GET, "/") => {
-                if let Some(query) = server::get_query(&req) {
+                if let Some(query) = server_helpers::get_query(&req) {
                     if let Some(token) = query.get("t") {
                         if let Some(token) = token {
                             let mut auth_code: Option<String> = None;
@@ -38,11 +34,16 @@ fn make_handler() -> Box<dyn FnMut(Request<Body>) -> BoxFut + Send> {
                     }
                 }
 
-                server::redirect(&mut response, &get_redirect(&req.uri().to_string()));
+                server_helpers::redirect(&mut response, &get_redirect(&req.uri().to_string()));
             }
 
             (&Method::GET, "/SpotifyLoginCallback/") => {
                 return spotify_login_callback::handle(&req);
+            }
+
+            (&Method::GET, path) if path.starts_with("/static/") => {
+                // TODO(lmp) cache small files?
+                return FileServer::serve("/static/", path);
             }
 
             _ => {

@@ -2,24 +2,19 @@ use hyper::{
     header::{HeaderValue, CONTENT_TYPE},
     Body, Response,
 };
-
 extern crate tokio;
-
 use futures::{future::join_all, Future};
-
-use simple_error::SimpleError;
-
-use std::collections::btree_map::BTreeMap;
-
 use serde::Serialize;
 use serde_json;
 
-use super::super::spotify_future::SpotifyFuture;
+use std::collections::btree_map::BTreeMap;
 
+use super::super::spotify_future::SpotifyFuture;
 use super::super::app::STATE;
 use super::super::spotify::Retriever;
 use super::super::spotify::TopArtistResponse;
 use super::super::spotify::TopTrackResponse;
+use super::super::server::ResponseFuture;
 
 #[derive(Serialize)]
 struct PresentationData<T>
@@ -30,9 +25,8 @@ where
     data: T,
 }
 
-type BoxFut = Box<dyn Future<Item = Response<Body>, Error = SimpleError> + Send>;
 
-pub fn handle(auth_code: &str) -> BoxFut {
+pub fn handle(auth_code: &str) -> ResponseFuture {
     let the_artists_futures = vec![
         SpotifyFuture::<TopArtistResponse>::new(Retriever::new(
             &auth_code,
