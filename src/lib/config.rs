@@ -1,3 +1,4 @@
+// TODO(lmp) can this be a macro?
 static KEY: &str = "SPOTIFY_TOPS_CONFIG_FILE_DIR";
 static CLIENT_ID_KEY: &str = "SPOTIFY_TOPS_CLIENT_ID";
 static CLIENT_SECRET_KEY: &str = "SPOTIFY_TOPS_CLIENT_SECRET";
@@ -5,6 +6,7 @@ static REDIRECT_HOST_AND_PORT_KEY: &str = "SPOTIFY_TOPS_REDIRECT_HOST_AND_PORT";
 static TEMPLATE_DIR_KEY: &str = "SPOTIFY_TOPS_TEMPLATE_DIR";
 static LISTEN_ADDR_KEY: &str = "SPOTIFY_TOPS_LISTEN_ADDR";
 static LISTEN_PORT_KEY: &str = "PORT";
+static STATIC_DIR_KEY: &str = "SPOTIFY_TOPS_STATIC_DIR";
 static FILE_NAME: &str = "spotifytopsconfig.toml";
 
 use std::env;
@@ -30,6 +32,7 @@ pub struct DeserializedConfig {
     pub template_dir: Option<String>,
     pub listen_addr: Option<String>,
     pub listen_port: Option<String>,
+    pub static_dir: Option<String>,
 }
 
 pub struct Config {
@@ -39,6 +42,7 @@ pub struct Config {
     pub template_dir: String,
     pub listen_addr: String,
     pub listen_port: String,
+    pub static_dir: String,
 }
 
 impl Config {
@@ -90,6 +94,7 @@ impl Default for Config {
                 template_dir: None,
                 listen_addr: None,
                 listen_port: None,
+                static_dir: None,
             }
         };
 
@@ -112,6 +117,7 @@ impl Default for Config {
             ),
             listen_addr: env_var_deserialized_or_default(LISTEN_ADDR_KEY, config.listen_addr, ""),
             listen_port: env_var_deserialized_or_default(LISTEN_PORT_KEY, config.listen_port, ""),
+            static_dir: env_var_deserialized_or_default(STATIC_DIR_KEY, config.static_dir, ""),
         }
     }
 }
