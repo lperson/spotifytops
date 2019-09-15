@@ -12,18 +12,12 @@ use std::boxed::Box;
 use super::super::types::ResponseFuture;
 use super::super::CONFIG;
 
-const CHUNK_SIZE: usize = 1024;
+const CHUNK_SIZE: usize = 128;
 
-enum FileServerState {
-    Opening,
-    Reading,
-}
-
-pub struct FileServer {
-    state: FileServerState,
-    open_future: OpenFuture<String>,
-    stream: Option<tokio::fs::File>,
-    buf: [u8; CHUNK_SIZE],
+pub enum FileServer {
+    None,
+    Opening(OpenFuture<String>),
+    Reading((tokio::fs::File, [u8; CHUNK_SIZE])),
 }
 
 // todo(LMP) need 404
@@ -31,12 +25,7 @@ impl FileServer {
     pub fn serve(root: &str, path: &str) -> ResponseFuture {
         let relative_path = &path[root.len()..];
         let open_future = tokio::fs::File::open(format!("{}/{}", CONFIG.static_dir, relative_path));
-        let file_server = FileServer {
-            state: FileServerState::Opening,
-            open_future,
-            stream: None,
-            buf: [0; CHUNK_SIZE],
-        };
+        let file_server = FileServer::Opening(open_future);
 
         let response = Response::<Body>::new(Body::wrap_stream(file_server));
         Box::new(future::ok(response))
@@ -48,11 +37,14 @@ impl Stream for FileServer {
     type Error = SimpleError;
 
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
-        match self.state {
-            FileServerState::Opening => match self.open_future.poll() {
+        let mut temp_self = FileServer::None;
+        std::mem::swap(&mut temp_self, self);
+
+        match temp_self {
+            FileServer::Opening(mut open_future) => match open_future.poll() {
                 Ok(Async::Ready(file)) => {
-                    self.state = FileServerState::Reading;
-                    self.stream = Some(file);
+                    let mut reading = FileServer::Reading((file, [0; CHUNK_SIZE]));
+                    std::mem::swap(&mut reading, self);
                     self.poll()
                 }
 
@@ -63,17 +55,14 @@ impl Stream for FileServer {
                 }
             },
 
-            FileServerState::Reading => {
-                let mut stream = None;
-                std::mem::swap(&mut stream, &mut self.stream);
-                let mut unwrapped_stream = stream.unwrap();
-                let result = match unwrapped_stream.poll_read(&mut self.buf) {
+            FileServer::Reading((mut file, mut buf)) => {
+                let result = match file.poll_read(&mut buf) {
                     Ok(Async::Ready(0)) => Ok(Async::Ready(None)),
 
                     Ok(Async::Ready(bytes_read)) => {
                         let mut value = vec![0; bytes_read];
                         value.as_mut_slice()[0..bytes_read]
-                            .copy_from_slice(&self.buf[0..bytes_read]);
+                            .copy_from_slice(&buf[0..bytes_read]);
                         Ok(Async::Ready(Some(value)))
                     }
 
@@ -81,9 +70,15 @@ impl Stream for FileServer {
 
                     Err(_) => Err(SimpleError::new("error in FileServer")),
                 };
-                let mut stream = Some(unwrapped_stream);
-                std::mem::swap(&mut stream, &mut self.stream);
+
+                let mut new_reading = FileServer::Reading((file, [0; CHUNK_SIZE]));
+                std::mem::swap(&mut new_reading, self);
                 result
+            }
+
+            FileServer::None => { 
+                println!("Impossible condition achieved");
+                Err(SimpleError::new("impossible condition achieved"))
             }
         }
     }
