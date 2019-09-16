@@ -9,6 +9,7 @@ use serde_json;
 
 use std::collections::btree_map::BTreeMap;
 
+use super::super::spotify_future::SpotifyFuture;
 use super::super::app::STATE;
 use super::super::server::ResponseFuture;
 use super::super::spotify::{
