@@ -16,7 +16,6 @@ use super::super::spotify::{
     recently_played_request, top_items_request, RecentlyPlayedResponse, Retriever,
     TopArtistResponse, TopTracksResponse,
 };
-use super::super::spotify_future::SpotifyFuture;
 
 #[derive(Serialize)]
 struct PresentationData<T>
