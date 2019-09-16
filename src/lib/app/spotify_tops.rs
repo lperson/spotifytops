@@ -9,12 +9,13 @@ use serde_json;
 
 use std::collections::btree_map::BTreeMap;
 
-use super::super::spotify_future::SpotifyFuture;
 use super::super::app::STATE;
-use super::super::spotify::Retriever;
-use super::super::spotify::TopArtistResponse;
-use super::super::spotify::TopTrackResponse;
 use super::super::server::ResponseFuture;
+use super::super::spotify::{
+    recently_played_request, top_items_request, RecentlyPlayedResponse, Retriever,
+    TopArtistResponse, TopTracksResponse,
+};
+use super::super::spotify_future::SpotifyFuture;
 
 #[derive(Serialize)]
 struct PresentationData<T>
@@ -25,27 +26,41 @@ where
     data: T,
 }
 
-
 pub fn handle(auth_code: &str) -> ResponseFuture {
     let the_artists_futures = vec![
         SpotifyFuture::<TopArtistResponse>::new(Retriever::new(
             &auth_code,
-            "artists",
-            "short_term",
+            top_items_request::make_request("artists", "short_term"),
         )),
         SpotifyFuture::<TopArtistResponse>::new(Retriever::new(
             &auth_code,
-            "artists",
-            "medium_term",
+            top_items_request::make_request("artists", "medium_term"),
         )),
-        SpotifyFuture::<TopArtistResponse>::new(Retriever::new(&auth_code, "artists", "long_term")),
+        SpotifyFuture::<TopArtistResponse>::new(Retriever::new(
+            &auth_code,
+            top_items_request::make_request("artists", "long_term"),
+        )),
     ];
 
     let the_tracks_futures = vec![
-        SpotifyFuture::<TopTrackResponse>::new(Retriever::new(&auth_code, "tracks", "short_term")),
-        SpotifyFuture::<TopTrackResponse>::new(Retriever::new(&auth_code, "tracks", "medium_term")),
-        SpotifyFuture::<TopTrackResponse>::new(Retriever::new(&auth_code, "tracks", "long_term")),
+        SpotifyFuture::<TopTracksResponse>::new(Retriever::new(
+            &auth_code,
+            top_items_request::make_request("tracks", "short_term"),
+        )),
+        SpotifyFuture::<TopTracksResponse>::new(Retriever::new(
+            &auth_code,
+            top_items_request::make_request("tracks", "medium_term"),
+        )),
+        SpotifyFuture::<TopTracksResponse>::new(Retriever::new(
+            &auth_code,
+            top_items_request::make_request("tracks", "long_term"),
+        )),
     ];
+
+    let the_recently_played_future = SpotifyFuture::<RecentlyPlayedResponse>::new(Retriever::new(
+        &auth_code,
+        recently_played_request::make_request(),
+    ));
 
     let time_frames = [
         "Short Term (4 weeks)",
@@ -55,7 +70,8 @@ pub fn handle(auth_code: &str) -> ResponseFuture {
 
     let the_future = join_all(the_artists_futures)
         .join(join_all(the_tracks_futures))
-        .map(move |(artists_results, tracks_results)| {
+        .join(the_recently_played_future)
+        .map(move |((artists_results, tracks_results), recently_played_results)| {
             // TODO(lmp) this is a good candidate for macro_rules!
             let artists_results: Vec<PresentationData<TopArtistResponse>> = artists_results
                 .iter()
@@ -66,7 +82,7 @@ pub fn handle(auth_code: &str) -> ResponseFuture {
                 })
                 .collect();
 
-            let tracks_results: Vec<PresentationData<TopTrackResponse>> = tracks_results
+            let tracks_results: Vec<PresentationData<TopTracksResponse>> = tracks_results
                 .iter()
                 .zip(time_frames.iter())
                 .map(move |(tracks_result, header)| PresentationData {
@@ -75,9 +91,15 @@ pub fn handle(auth_code: &str) -> ResponseFuture {
                 })
                 .collect();
 
+            let recently_played_results = PresentationData {
+                header: String::from("Last 50 Tracks Played"),
+                data: recently_played_results.clone()
+            };
+
             let mut data = BTreeMap::new();
             data.insert("artists", serde_json::to_value(artists_results).unwrap());
             data.insert("tracks", serde_json::to_value(tracks_results).unwrap());
+            data.insert("recent", serde_json::to_value(recently_played_results).unwrap());
 
             let rendered = STATE.handlebars.render("tops", &data).unwrap();
 

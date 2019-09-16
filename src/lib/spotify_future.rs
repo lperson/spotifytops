@@ -8,7 +8,7 @@ use simple_error::SimpleError;
 
 use super::app::STATE;
 
-use super::spotify::top_items_retriever::{Retriever, Retrievable};
+use super::spotify::{Retriever, Retrievable};
 use serde::de::DeserializeOwned;
 
 type BoxFut<T> = Box<dyn Future<Item = T, Error = SimpleError> + Send>;
@@ -28,7 +28,7 @@ impl<'a, T> SpotifyFuture<'a, T>
     {
         let request = Request::builder()
             .method("GET")
-            .uri(retriever.uri.clone())
+            .uri(retriever.retrievable_request.uri.clone())
             .header(AUTHORIZATION, retriever.authorization.clone())
             .header(ACCEPT, "application/json")
             .header(CONTENT_TYPE, "application/json")
@@ -43,9 +43,12 @@ impl<'a, T> SpotifyFuture<'a, T>
                     .iter()
                     .any(|x| result.status().as_u16() == *x)
                 {
+                    // TODO(lmp) get the body so we can log the error details
                     let this_return = future::err(SimpleError::new("400"));
                     return this_return;
                 }
+
+                // TODO(lmp) handle rate limit violations
 
                 future::ok(result)
             })

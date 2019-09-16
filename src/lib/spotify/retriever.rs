@@ -3,8 +3,18 @@ use std::marker::PhantomData;
 use serde::de::DeserializeOwned;
 use serde_json;
 
-pub struct Retriever<T> {
+pub struct RetrievableRequest {
     pub uri: String,
+}
+
+impl RetrievableRequest {
+    pub fn new(uri: String) -> Self {
+        Self { uri }
+    }
+}
+
+pub struct Retriever<T> {
+    pub retrievable_request: RetrievableRequest,
     pub authorization: String,
     phantom: PhantomData<T>,
 }
@@ -15,16 +25,11 @@ pub trait Retrievable<'a> {
 }
 
 impl<T> Retriever<T> {
-    pub fn new(auth_code: &str, what_to_get: &str, timeframe: &str) -> Self {
-        let uri = format!(
-            "https://api.spotify.com/v1/me/top/{}?limit=50&time_range={}",
-            what_to_get, timeframe
-        );
-
+    pub fn new(auth_code: &str, retrievable_request: RetrievableRequest) -> Self {
         let authorization = format!("Bearer {}", auth_code);
 
         Self {
-            uri,
+            retrievable_request, 
             authorization,
             phantom: PhantomData,
         }
@@ -33,13 +38,13 @@ impl<T> Retriever<T> {
 
 impl<'a, T> Retrievable<'a> for Retriever<T>
 where
-    T: DeserializeOwned
+    T: DeserializeOwned,
 {
     type Item = T;
 
     fn deserialize(s: &'a str) -> Result<Self::Item, serde_json::Error>
     where
-        T: DeserializeOwned
+        T: DeserializeOwned,
     {
         serde_json::from_str(s)
     }

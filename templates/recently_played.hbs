@@ -1,0 +1,10 @@
+<div>
+  <div><b>{{header}}</b></div>
+  <ol>
+    {{#each data.items}}
+    <li>
+      {{#each track.artists}}<span>{{name}}{{#unless @last}}, {{/unless}}</span>{{/each}} &mdash; {{track.name}}
+    </li>
+    {{/each}}
+  </ol>
+</div>
