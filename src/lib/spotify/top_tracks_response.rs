@@ -2,10 +2,10 @@ use serde::{Deserialize, Serialize};
 use std::vec::Vec;
 
 use super::error_object;
-use super::MinimalArtist;
+use super::MinimalTrack;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct TopArtistResponse {
+pub struct TopTracksResponse {
     error: Option<error_object::ErrorObject>,
-    items: Option<Vec<MinimalArtist>>,
+    items: Option<Vec<MinimalTrack>>,
 }

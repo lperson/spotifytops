@@ -1,3 +1,5 @@
+// TODO(lmp) this should be weighted so that less frequently used items are removed first
+
 use std::collections::{hash_map::HashMap, vec_deque::VecDeque};
 
 pub struct MruHashmap<K, V> {
@@ -38,7 +40,7 @@ where
         self.hash_map.insert(k, v)
     }
 
-    pub fn get(&mut self, k: &K) -> Option<&V> {
+    pub fn get(&self, k: &K) -> Option<&V> {
         self.hash_map.get(&k)
     }
 }

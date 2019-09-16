@@ -64,7 +64,7 @@ pub fn handle(req: &Request<Body>) -> ResponseFuture {
                     let token = token_response.access_token.unwrap();
 
                     {
-                        let mut tokens = STATE.tokens.lock().unwrap();
+                        let mut tokens = STATE.tokens.write().unwrap();
                         tokens.insert(uuid.clone(), token);
                     }
 

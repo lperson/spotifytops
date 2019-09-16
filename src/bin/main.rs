@@ -22,7 +22,7 @@ fn make_handler() -> Box<dyn FnMut(Request<Body>) -> ResponseFuture + Send> {
                         if let Some(token) = token {
                             let mut auth_code: Option<String> = None;
                             {
-                                let mut tokens = STATE.tokens.lock().unwrap();
+                                let tokens = STATE.tokens.read().unwrap();
                                 if let Some(stored_auth_code) = tokens.get(&token) {
                                     auth_code = Some(stored_auth_code.clone());
                                 }
