@@ -94,7 +94,7 @@ mod tests {
 
     #[test]
     fn key_not_found_in_empty_mru_hashmap() {
-        let mut ch: MruHashmap<u32, u32> = Default::default();
+        let ch: MruHashmap<u32, u32> = Default::default();
         assert_eq!(ch.get(&1), None);
     }
 

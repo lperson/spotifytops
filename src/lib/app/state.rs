@@ -3,7 +3,7 @@ use handlebars::Handlebars;
 use hyper::{client::HttpConnector, Client};
 use hyper_tls::HttpsConnector;
 
-use std::sync::{ Mutex, Arc, RwLock };
+use std::sync::{Arc, RwLock};
 
 use super::super::mru_hashmap::MruHashmap;
 
@@ -41,13 +41,16 @@ impl Default for State {
             .register_template_file("tops", format!("{}/tops.hbs", CONFIG.template_dir))
             .unwrap();
         handlebars
-            .register_template_file("recently_played", format!("{}/recently_played.hbs", CONFIG.template_dir))
+            .register_template_file(
+                "recently_played",
+                format!("{}/recently_played.hbs", CONFIG.template_dir),
+            )
             .unwrap();
 
         State {
             http_client,
             handlebars,
-            tokens
+            tokens,
         }
     }
 }

@@ -6,11 +6,8 @@ use std::vec::Vec;
 use hyper::header;
 use hyper::http::HeaderValue;
 use hyper::{Body, Request, Response, StatusCode};
-use futures::future;
 
 use percent_encoding;
-
-use super::ResponseFuture;
 
 pub fn redirect<'a>(response: &'a mut Response<Body>, location: &str) -> &'a Response<Body> {
     *response.status_mut() = StatusCode::FOUND;
