@@ -18,3 +18,6 @@ pub use spotify_future::*;
 
 pub mod mru_hashmap;
 pub use mru_hashmap::*;
+
+pub mod throttling_future;
+pub use throttling_future::{ThrottlingFuture, ThrottlingFutureQueue, ThrottlingFutureThrottler};

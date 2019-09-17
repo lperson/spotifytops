@@ -9,7 +9,8 @@ use serde_json;
 
 use std::collections::btree_map::BTreeMap;
 
-use super::super::spotify_future::SpotifyFuture;
+use super::super::SpotifyFuture;
+use super::super::ThrottlingFuture;
 use super::super::app::STATE;
 use super::super::server::ResponseFuture;
 use super::super::spotify::{
@@ -111,6 +112,8 @@ pub fn handle(auth_code: &str) -> ResponseFuture {
             response
         })
         .map_err(|x| x);
+
+        let the_future = ThrottlingFuture::new(Box::new(the_future));
 
     Box::new(the_future)
 }
