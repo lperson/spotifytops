@@ -1,6 +1,6 @@
 use futures::future;
 use futures::{prelude::*, Poll, Stream};
-use hyper::{Body, Response, StatusCode};
+use hyper::{Body, Response as HyperResponse, StatusCode};
 use simple_error::SimpleError;
 use tokio::io::AsyncRead;
 
@@ -8,7 +8,7 @@ use std::boxed::Box;
 //use std::path::Path;
 
 //use super::super::server::helpers::file_path_mime;
-use super::super::server::respond_with_status;
+use super::super::Response;
 use super::super::types::ResponseFuture;
 use super::super::CONFIG;
 
@@ -24,14 +24,15 @@ impl FileServer {
         let relative_path = &path[root.len()..];
         let the_future = tokio::fs::File::open(format!("{}/{}", CONFIG.static_dir, relative_path))
             .map(|file| {
-                Response::<Body>::new(Body::wrap_stream(FileServer {
+                HyperResponse::<Body>::new(Body::wrap_stream(FileServer {
                     file,
                     buf: [0; CHUNK_SIZE],
                 }))
             })
             .or_else(|e| {
                 println!("ERROR OPENING FILE {:?}", e);
-                future::ok(respond_with_status(StatusCode::NOT_FOUND))
+                let response: HyperResponse<Body> = Response::with_status(StatusCode::NOT_FOUND).into();
+                future::ok(response)
             });
 
         Box::new(the_future)

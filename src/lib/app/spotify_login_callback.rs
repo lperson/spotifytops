@@ -1,6 +1,6 @@
 use hyper::{
     header::{CONTENT_LENGTH, CONTENT_TYPE},
-    Body, Request, Response,
+    Body, Request,
 };
 extern crate tokio;
 use futures::{prelude::*, Future};
@@ -9,7 +9,7 @@ use serde_json;
 use uuid::Uuid;
 
 use super::super::app::STATE;
-use super::super::server::helpers as server_helpers;
+use super::super::server::{Response, helpers as server_helpers};
 use super::super::spotify::auth::{token_request, token_response};
 use super::super::CONFIG;
 use super::super::server::ResponseFuture;
@@ -68,12 +68,10 @@ pub fn handle(req: &Request<Body>) -> ResponseFuture {
                         tokens.insert(uuid.clone(), token);
                     }
 
-                    let mut response = Response::new(Body::empty());
-                    server_helpers::redirect(
-                        &mut response,
-                        format!("{}/?t={}", CONFIG.redirect_host_and_port, uuid).as_str(),
-                    );
-                    Ok(response)
+                    let response = Response::with_redirect(
+                        format!("{}/?t={}", CONFIG.redirect_host_and_port, uuid).as_str());
+
+                    Ok(response.into())
                 })
                 .map(|result| result.unwrap())
                 .map_err(|_| SimpleError::new("error retrieving token response body"))

@@ -6,3 +6,6 @@ pub use file_server::*;
 
 pub mod types;
 pub use types::*;
+
+pub mod response;
+pub use response::Response;

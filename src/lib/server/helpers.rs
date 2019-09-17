@@ -3,25 +3,9 @@ use std::path::Path;
 use std::rc::Rc;
 use std::vec::Vec;
 
-use hyper::header;
-use hyper::http::HeaderValue;
-use hyper::{Body, Request, Response, StatusCode};
+use hyper::{Body, Request};
 
 use percent_encoding;
-
-pub fn redirect<'a>(response: &'a mut Response<Body>, location: &str) -> &'a Response<Body> {
-    *response.status_mut() = StatusCode::FOUND;
-    response
-        .headers_mut()
-        .append(header::LOCATION, HeaderValue::from_str(&location).unwrap());
-    response
-}
-
-pub fn respond_with_status(status_code: StatusCode) -> Response<Body> {
-    let mut response = Response::<Body>::new(Body::empty());
-    *response.status_mut() = status_code;
-    response
-}
 
 pub fn get_query(request: &Request<Body>) -> Option<HashMap<&str, Option<Rc<String>>>> {
     request
