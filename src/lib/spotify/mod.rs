@@ -27,3 +27,6 @@ pub use minimal_artist::MinimalArtist;
 
 pub mod minimal_track;
 pub use minimal_track::MinimalTrack;
+
+pub mod throttling_future;
+pub use throttling_future::THROTTLE;

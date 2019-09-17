@@ -1,6 +1,6 @@
 use futures::{future, Future};
 use hyper::service::service_fn;
-use hyper::{Body, Method, Request, Response, Server, StatusCode};
+use hyper::{Body, Method, Request, Response as HyperResponse, Server, StatusCode};
 
 use libspotifytops::app::spotify_login_callback;
 use libspotifytops::app::spotify_tops;
@@ -8,12 +8,11 @@ use libspotifytops::app::STATE;
 use libspotifytops::server::{helpers as server_helpers, FileServer, ResponseFuture};
 use libspotifytops::spotify::auth::*;
 use libspotifytops::CONFIG;
-
+use libspotifytops::server::Response;
 
 fn make_handler() -> Box<dyn FnMut(Request<Body>) -> ResponseFuture + Send> {
     Box::new(move |req: Request<Body>| -> ResponseFuture {
         println!("{:?}", req);
-        let mut response = Response::new(Body::empty());
 
         match (req.method(), req.uri().path()) {
             (&Method::GET, "/") => {
@@ -34,25 +33,26 @@ fn make_handler() -> Box<dyn FnMut(Request<Body>) -> ResponseFuture + Send> {
                     }
                 }
 
-                server_helpers::redirect(&mut response, &get_redirect(&req.uri().to_string()));
+                let response = Response::with_redirect(&get_redirect(&req.uri().to_string()));
+                Box::new(future::ok(response.into()))
             }
 
             (&Method::GET, "/SpotifyLoginCallback/") => {
-                return spotify_login_callback::handle(&req);
+                spotify_login_callback::handle(&req)
             }
 
             (&Method::GET, path) if path.starts_with("/static/") => {
                 // TODO(lmp) cache small files?
-                return FileServer::serve("/static/", path);
+                FileServer::serve("/static/", path)
             }
 
             _ => {
                 println!("CATCHALL {} {:?}", req.uri().path(), req);
-                *response.status_mut() = StatusCode::NOT_FOUND;
-            }
-        };
 
-        Box::new(future::ok(response))
+                let response: HyperResponse<Body> = Response::with_status(StatusCode::NOT_FOUND).into();
+                Box::new(future::ok(response))
+            }
+        }
     })
 }
 

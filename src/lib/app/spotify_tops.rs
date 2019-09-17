@@ -17,6 +17,7 @@ use super::super::spotify::{
     recently_played_request, top_items_request, RecentlyPlayedResponse, Retriever,
     TopArtistResponse, TopTracksResponse,
 };
+use super::super::THROTTLE;
 
 #[derive(Serialize)]
 struct PresentationData<T>
@@ -113,7 +114,7 @@ pub fn handle(auth_code: &str) -> ResponseFuture {
         })
         .map_err(|x| x);
 
-        let the_future = ThrottlingFuture::new(Box::new(the_future));
+        let the_future = ThrottlingFuture::new(Box::new(the_future), &THROTTLE);
 
     Box::new(the_future)
 }
