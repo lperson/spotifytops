@@ -2,7 +2,6 @@ use hyper::{
     header::{CONTENT_LENGTH, CONTENT_TYPE},
     Body, Request,
 };
-extern crate tokio;
 use futures::{prelude::*, Future};
 use simple_error::SimpleError;
 use serde_json;

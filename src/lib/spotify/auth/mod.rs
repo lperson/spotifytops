@@ -1,4 +1,3 @@
-extern crate percent_encoding;
 use percent_encoding::{percent_encode, CONTROLS};
 
 pub mod spotify_scopes;
