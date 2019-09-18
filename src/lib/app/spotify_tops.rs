@@ -1,8 +1,4 @@
-use hyper::{
-    header::{HeaderValue, CONTENT_TYPE},
-    Body, Response,
-};
-extern crate tokio;
+use hyper::header::CONTENT_TYPE;
 use futures::{future::join_all, Future};
 use serde::Serialize;
 use serde_json;
@@ -12,7 +8,7 @@ use std::collections::btree_map::BTreeMap;
 use super::super::SpotifyFuture;
 use super::super::ThrottlingFuture;
 use super::super::app::STATE;
-use super::super::server::ResponseFuture;
+use super::super::server::{ResponseFuture, Response};
 use super::super::spotify::{
     recently_played_request, top_items_request, RecentlyPlayedResponse, Retriever,
     TopArtistResponse, TopTracksResponse,
@@ -105,12 +101,12 @@ pub fn handle(auth_code: &str) -> ResponseFuture {
 
             let rendered = STATE.handlebars.render("tops", &data).unwrap();
 
-            let mut response = Response::<Body>::new(Body::from(rendered));
-            response.headers_mut().insert(
+            let mut response = Response::from_string(rendered);
+            response.set_header(
                 CONTENT_TYPE,
-                HeaderValue::from_static("text/html; charset=utf-8"),
+                "text/html; charset=utf-8"
             );
-            response
+            response.into()
         })
         .map_err(|x| x);
 

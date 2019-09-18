@@ -14,10 +14,8 @@ use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 
-// extern crate dirs;
 use dirs::home_dir;
 
-// extern crate serde;
 use serde::Deserialize;
 
 lazy_static! {
